@@ -1,0 +1,3 @@
+[submodule "idsds"]
+	path = idsds
+	url = git@github.com:visinf/idsds.git
