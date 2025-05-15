@@ -1,0 +1,18 @@
+services:
+  idsds-linux-rocm:
+      group_add:
+        - video
+      ports:
+        - "0.0.0.0:8888:8888"
+      volumes:
+        - /mnt/usb:/workspace/hd
+        - ..:/workspace/src
+      stdin_open: true
+      tty: true
+      image: rocm/pytorch:rocm6.4_ubuntu24.04_py3.12_pytorch_release_2.4.1
+      devices:
+        - /dev/kfd
+        - /dev/dri
+      ipc: host
+      environment:
+        - HSA_OVERRIDE_GFX_VERSION=${HSA_OVERRIDE_GFX_VERSION}
