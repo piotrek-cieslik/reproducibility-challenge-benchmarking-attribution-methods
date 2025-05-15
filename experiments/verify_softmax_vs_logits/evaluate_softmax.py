@@ -27,7 +27,7 @@ from models.bcos_v2.bcos_resnet import resnet50 as bcos_resnet50
 from models.bcos_v2.bcos_resnet import resnet18 as bcos_resnet18
 
 from utils.utils_batch import get_imagenet_loaders, str2bool
-from explainers.explainer_wrapper import CaptumAttributionExplainer, CaptumNoiseTunnelAttributionExplainer, TorchcamExplainer, ViTGradCamExplainer, ViTRolloutExplainer, ViTCheferLRPExplainer, BcosExplainer, BagNetExplainer, RiseExplainer, DummyAttributionExplainer, EdgeDetectionExplainer, FrequencyExplainer
+from explainers.explainer_wrapper import CaptumAttributionExplainer, CaptumNoiseTunnelAttributionExplainer, TorchcamExplainer, ViTGradCamExplainer, ViTRolloutExplainer, ViTCheferLRPExplainer, BcosExplainer, BagNetExplainer, RiseExplainer
 from single_deletion import single_deletion_protocol
 from incremental_deletion import incremental_deletion_protocol
 
@@ -126,43 +126,43 @@ def create_model(device, model_string, pretrained, pretrained_ckpt, explainer_st
         model = StandardModel(model, gradcam_target_layer = 'model.layer4', use_softmax=use_softmax)
     elif model_string == 'resnet18':
         model = resnet18(pretrained=pretrained)
-        model = StandardModel(model, gradcam_target_layer = 'model.layer4')
+        model = StandardModel(model, gradcam_target_layer = 'model.layer4', use_softmax=use_softmax)
     elif model_string == 'resnet101':
         model = resnet101(pretrained=pretrained)
-        model = StandardModel(model, gradcam_target_layer = 'model.layer4')
+        model = StandardModel(model, gradcam_target_layer = 'model.layer4', use_softmax=use_softmax)
     elif model_string == 'resnet152':
         model = resnet152(pretrained=pretrained)
-        model = StandardModel(model, gradcam_target_layer = 'model.layer4')
+        model = StandardModel(model, gradcam_target_layer = 'model.layer4', use_softmax=use_softmax)
     elif model_string == 'wide_resnet50_2':
         model = wide_resnet50_2(pretrained=pretrained)
-        model = StandardModel(model, gradcam_target_layer = 'model.layer4')
+        model = StandardModel(model, gradcam_target_layer = 'model.layer4', use_softmax=use_softmax)
     elif model_string == 'fixup_resnet50':
         model = fixup_resnet50()
-        model = StandardModel(model, gradcam_target_layer = 'model.layer4')
+        model = StandardModel(model, gradcam_target_layer = 'model.layer4', use_softmax=use_softmax)
     elif model_string == 'vgg11':
         model = vgg11(pretrained=pretrained)
-        model = StandardModel(model, gradcam_target_layer = 'model.features')
+        model = StandardModel(model, gradcam_target_layer = 'model.features', use_softmax=use_softmax)
     elif model_string == 'vgg13':
         model = vgg13(pretrained=pretrained)
-        model = StandardModel(model, gradcam_target_layer = 'model.features')
+        model = StandardModel(model, gradcam_target_layer = 'model.features', use_softmax=use_softmax)
     elif model_string == 'vgg16':
         model = vgg16(pretrained=pretrained)
         model = StandardModel(model, gradcam_target_layer = 'model.features', use_softmax=use_softmax)
     elif model_string == 'vgg19':
         model = vgg19(pretrained=pretrained)
-        model = StandardModel(model, gradcam_target_layer = 'model.features')
+        model = StandardModel(model, gradcam_target_layer = 'model.features', use_softmax=use_softmax)
     elif model_string == 'vgg16_bn':
         model = vgg16_bn(pretrained=pretrained)
-        model = StandardModel(model, gradcam_target_layer = 'model.features')
+        model = StandardModel(model, gradcam_target_layer = 'model.features', use_softmax=use_softmax)
     elif model_string == 'x_vgg16':
         model = xvgg16()
-        model = StandardModel(model, gradcam_target_layer = 'model.features')
+        model = StandardModel(model, gradcam_target_layer = 'model.features', use_softmax=use_softmax)
     elif model_string == 'bagnet33':
         model = bagnet33(pretrained=pretrained)
-        model = StandardModel(model)
+        model = StandardModel(model, use_softmax=use_softmax)
     elif model_string == 'x_resnet50':
         model = xfixup_resnet50()
-        model = StandardModel(model, gradcam_target_layer = 'model.layer4')
+        model = StandardModel(model, gradcam_target_layer = 'model.layer4', use_softmax=use_softmax)
     elif model_string == 'bcos_resnet50':
         model = bcos_resnet50(pretrained=pretrained, long_version=False)
         model = BcosModel(model)
@@ -294,32 +294,6 @@ def create_explainer(device, model, model_string, explainer_string, attribution_
         assert use_softmax == False # make sure the model does not use softmax output because it is used in RISE
         baseline = torch.rand((1,3,224,224)).to(device) * 2. - 1. # range is -1 to 1 which is approximately image range
         explainer = RiseExplainer(model, seed, baseline)
-    elif explainer_string == 'Dummy-Random':
-        explainer = DummyAttributionExplainer('random')
-    elif explainer_string == 'Dummy-Random-Squared':
-        explainer = DummyAttributionExplainer('random-squared')
-    elif explainer_string == 'Dummy-Random-Plus-One':
-        explainer = DummyAttributionExplainer('random-plus-one')
-    elif explainer_string == 'Dummy-Gaussian':
-        assert sigma is not None
-        explainer = DummyAttributionExplainer('gaussian', sigma=sigma)
-    elif explainer_string == 'Dummy-Entropy':
-        assert kernel_size is not None
-        explainer = DummyAttributionExplainer('entropy', kernel_size=kernel_size)
-    elif explainer_string == 'Edge-Sobel':
-        explainer = EdgeDetectionExplainer('sobel')
-    elif explainer_string == 'Edge-Gradient':
-        explainer = EdgeDetectionExplainer('gradient')
-    elif explainer_string == 'Edge-Canny':
-        explainer = EdgeDetectionExplainer('canny')
-    elif explainer_string == 'Edge-Marr-Hildreth':
-        explainer = EdgeDetectionExplainer('marr-hildreth')
-    elif explainer_string == 'Frequency-low':
-        explainer = FrequencyExplainer('low')
-    elif explainer_string == 'Frequency-high':
-        explainer = FrequencyExplainer('high')
-    elif explainer_string == 'Frequency-band':
-        explainer = FrequencyExplainer('band')
     else:
         print('Explainer not implemented')
 
@@ -416,36 +390,18 @@ def main():
 
         pretrained_ckpt = f'{args.pretrained_ckpt_path}/{model_weights_dict[model_string]}'
 
-        for explainer_string in ['Gradient', 'IxG', 'IxG-SG', 'IG', 'IG-U', 'IG-SG']:
+        attribution_transform = 'abs'
+        explainer_string = 'Gradient'
+        result = evaluate(args, args.seed, args.data_dir, args.batch_size, args.workers, device, model_string, explainer_string, attribution_transform, pretrained, pretrained_ckpt, args.use_softmax)
+        writer.write(f'{model_string},{explainer_string}-{attribution_transform},{result}')
+
+        for explainer_string in ['IxG', 'IxG-SG']:
             for attribution_transform in ['raw', 'abs']:
                 result = evaluate(args, args.seed, args.data_dir, args.batch_size, args.workers, device, model_string, explainer_string, attribution_transform, pretrained, pretrained_ckpt, args.use_softmax)
                 writer.write(f'{model_string},{explainer_string}-{attribution_transform},{result}')
 
-        explainer_string = 'IG-SG-SQ'
-        attribution_transform = 'abs'
-        result = evaluate(args, args.seed, args.data_dir, args.batch_size, args.workers, device, model_string, explainer_string, attribution_transform, pretrained, pretrained_ckpt, args.use_softmax)
-        writer.write(f'{model_string},{explainer_string}-{attribution_transform},{result}')
-
         attribution_transform = 'raw'
         for explainer_string in ['Grad-CAM', 'Grad-CAMpp', 'SG-CAMpp', 'XG-CAM', 'Layer-CAM']:
-            result = evaluate(args, args.seed, args.data_dir, args.batch_size, args.workers, device, model_string, explainer_string, attribution_transform, pretrained, pretrained_ckpt, args.use_softmax)
-            writer.write(f'{model_string},{explainer_string},{result}')
-
-        explainer_string='Dummy-Gaussian'
-        for sigma in [1, 2, 4, 6, 8, 12, 16, 20, 24, 28, 32, 40, 48, 56, 64, 80, 96, 128, 160, 256]:
-            result = evaluate(args, args.seed, args.data_dir, args.batch_size, args.workers, device, model_string, explainer_string, attribution_transform, pretrained, pretrained_ckpt, args.use_softmax, sigma=sigma)
-            writer.write(f'{model_string},{explainer_string}-{sigma},{result}')
-
-        explainer_string='Dummy-Entropy'
-        for kernel_size in [3, 5, 7, 9, 13, 17, 31]:
-            result = evaluate(args, args.seed, args.data_dir, args.batch_size, args.workers, device, model_string, explainer_string, attribution_transform, pretrained, pretrained_ckpt, args.use_softmax, kernel_size=kernel_size)
-            writer.write(f'{model_string},{explainer_string}-{kernel_size},{result}')
-
-        for explainer_string in ['Dummy-Random', 'Dummy-Random-Squared', 'Dummy-Random-Plus-One']:
-            result = evaluate(args, args.seed, args.data_dir, args.batch_size, args.workers, device, model_string, explainer_string, attribution_transform, pretrained, pretrained_ckpt, args.use_softmax)
-            writer.write(f'{model_string},{explainer_string},{result}')
-
-        for explainer_string in ['Edge-Sobel', 'Edge-Gradient', 'Edge-Canny', 'Edge-Marr-Hildreth', 'Frequency-low', 'Frequency-band', 'Frequency-high']:
             result = evaluate(args, args.seed, args.data_dir, args.batch_size, args.workers, device, model_string, explainer_string, attribution_transform, pretrained, pretrained_ckpt, args.use_softmax)
             writer.write(f'{model_string},{explainer_string},{result}')
 
