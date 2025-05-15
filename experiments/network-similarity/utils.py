@@ -6,9 +6,6 @@ from torch.utils.data import DataLoader
 from PIL import Image
 import random
 
-imagenetv2 = "/workspace/hd/imagenetv2_fixed"
-imagenetmini = "/workspace/hd/imagenet-mini/val"
-
 class PatchDeletion:
     def __init__(self, patch_size=56):
         self.patch_size = patch_size
@@ -26,7 +23,7 @@ class PatchDeletion:
         img.paste(patch, (x, y))
         return img
 
-def get_loader(batch_size=64):
+def get_loader(test_dir, batch_size=64):
     transform = transforms.Compose([
         transforms.Resize(256),
         transforms.CenterCrop(224),
@@ -35,10 +32,10 @@ def get_loader(batch_size=64):
                              std=[0.229, 0.224, 0.225]),
     ])
     
-    dataset = datasets.ImageFolder(imagenetmini, transform=transform)
+    dataset = datasets.ImageFolder(test_dir, transform=transform)
     return DataLoader(dataset, batch_size=batch_size, shuffle=False, num_workers=4)
 
-def get_corrupt_loader():
+def get_corrupt_loader(test_dir, batch_size=64):
     transform = transforms.Compose([
         transforms.Resize(256),
         transforms.CenterCrop(224),
@@ -48,8 +45,8 @@ def get_corrupt_loader():
                              std=[0.229, 0.224, 0.225]),
     ])
 
-    dataset = datasets.ImageFolder(imagenetmini, transform=transform)
-    return DataLoader(dataset, batch_size=64, shuffle=False, num_workers=4)
+    dataset = datasets.ImageFolder(test_dir, transform=transform)
+    return DataLoader(dataset, batch_size=batch_size, shuffle=False, num_workers=4)
 
 
 def load_state_dict(path, model):

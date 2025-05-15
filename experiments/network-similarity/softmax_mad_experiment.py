@@ -1,8 +1,13 @@
+import models
+import utils
+
 import torch
 import torch.nn.functional as F
 
 import pandas as pd
 import time
+
+import argparse
 
 def compare_softmax_mad(model1, model2, loader):
     device = "cuda:0" if torch.cuda.is_available() else "cpu"
@@ -41,31 +46,35 @@ def compare_softmax_mad(model1, model2, loader):
     
     return softmax_mad_score, logit_mad_score
 
-print("#"*60)
-print("Running Softmax Mean Absolute Difference Experiment")
-print("#"*60)
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Softmax Mean Absolute Difference Experiment")
+    parser.add_argument('--models_dir', type=str, required=True, help='Path to the tuned models directory')
+    parser.add_argument('--test_dir', type=str, required=True, help='Path to the test set directory')
+    args = parser.parse_args()
 
-print("Loading Dataset and Models...")
-import models
-import utils
-loader = utils.get_loader()
-model_pairs = models.get_softmax_test_pairs()
-print("#"*60)
-
-print("Performing Comparisons...")
-results = []
-total = len(model_pairs)
-for i, (k, v) in enumerate(model_pairs.items(), 1):
-    print(f"Comparing {i}/{total}: {k}")
-    start_time = time.time()
-    s, l = compare_softmax_mad(*v, loader)
-    duration = time.time() - start_time
-    print(f"Results: S={s:.6f}, L={l:.6f} in {duration:.0f} sec")
-    results.append({"Model": k, "Softmax MAD": s, "Logit MAD": l})
-print("#"*60)
-
-file_name = "softmax_mad_experiment.csv"
-print(f"Finished Experiment, Saving to {file_name}...")
-df = pd.DataFrame(results)
-df.to_csv(file_name, index=False)
+    print("#"*60)
+    print("Running Softmax Mean Absolute Difference Experiment")
+    print("#"*60)
+    
+    print("Loading Dataset and Models...")
+    loader = utils.get_loader(args.test_dir)
+    model_pairs = models.Models(args.models_dir).get_softmax_test_pairs()
+    print("#"*60)
+    
+    print("Performing Comparisons...")
+    results = []
+    total = len(model_pairs)
+    for i, (k, v) in enumerate(model_pairs.items(), 1):
+        print(f"Comparing {i}/{total}: {k}")
+        start_time = time.time()
+        s, l = compare_softmax_mad(*v, loader)
+        duration = time.time() - start_time
+        print(f"Results: S={s:.6f}, L={l:.6f} in {duration:.0f} sec")
+        results.append({"Model": k, "Softmax MAD": s, "Logit MAD": l})
+    print("#"*60)
+    
+    file_name = "softmax_mad_experiment.csv"
+    print(f"Finished Experiment, Saving to {file_name}...")
+    df = pd.DataFrame(results)
+    df.to_csv(file_name, index=False)
     
