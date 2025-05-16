@@ -148,22 +148,24 @@ class Models:
             "X VGG-16": (self.x_vgg16_ood, self.x_vgg16_id),
             #"Bagnet-33": (self.bagnet33_ood, self.bagnet33_id),
         }
+
     
-    def get_attribution_test_all_pairs(self):
+    def get_attribution_test_dict_all(self):
         return {
-            "Resnet-50 / VGG-16": (self.resnet50_ood, self.vgg16_ood),
-            "Resnet-18": (self.resnet18_ood, self.resnet18_id),
-            "Resnet-50": (self.resnet50_ood, self.resnet50_id),
-            "Resnet-101": (self.resnet101_ood, self.resnet101_id),
-            "Resnet-152": (self.resnet152_ood, self.resnet152_id),
-            "Wide Resnet-50": (self.wide_resnet50_ood, self.wide_resnet50_id),
-            "Fixup Resnet-50": (self.fixup_resnet50_ood, self.fixup_resnet50_id),
-            "X Resnet-50": (self.x_resnet50_ood, self.x_resnet50_id),
-            "VGG-11": (self.vgg11_ood, self.vgg11_id),
-            "VGG-13": (self.vgg13_ood, self.vgg13_id),
-            "VGG-16": (self.vgg16_ood, self.vgg16_id),
-            "VGG-19": (self.vgg19_ood, self.vgg19_id),
-            "BN VGG-16": (self.vgg16_bn_ood, self.vgg16_bn_id),
-            "X VGG-16": (self.x_vgg16_ood, self.x_vgg16_id),
+            # "Model": (model1, model2, layer1, layer2)
+            #"Resnet-50 / VGG-16": (self.resnet50_ood, self.vgg16_ood, "layer4", "features"),
+            "Resnet-18": (self.resnet18_ood, self.resnet18_id, "layer4", "layer4"),
+            "Resnet-50": (self.resnet50_ood, self.resnet50_id, "layer4", "layer4", ),
+            "Resnet-101": (self.resnet101_ood, self.resnet101_id, "layer4", "layer4", ),
+            "Resnet-152": (self.resnet152_ood, self.resnet152_id, "layer4", "layer4", ),
+            "Wide Resnet-50": (self.wide_resnet50_ood, self.wide_resnet50_id, "layer4", "layer4", ),
+            "Fixup Resnet-50": (self.fixup_resnet50_ood, self.fixup_resnet50_id, "layer4", "layer4", ),
+            "X Resnet-50": (self.x_resnet50_ood, self.x_resnet50_id, "layer4", "layer4", ),
+            "VGG-11": (self.vgg11_ood, self.vgg11_id, "features", "features"),
+            "VGG-13": (self.vgg13_ood, self.vgg13_id, "features", "features"),
+            "VGG-16": (self.vgg16_ood, self.vgg16_id, "features", "features"),
+            "VGG-19": (self.vgg19_ood, self.vgg19_id, "features", "features"),
+            "BN VGG-16": (self.vgg16_bn_ood, self.vgg16_bn_id, "features", "features"),
+            "X VGG-16": (self.x_vgg16_ood, self.x_vgg16_id, "features", "features"),
             #"Bagnet-33": (bagnet33_ood, bagnet33_id),
         }

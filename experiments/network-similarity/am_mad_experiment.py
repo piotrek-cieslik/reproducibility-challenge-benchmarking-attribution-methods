@@ -12,7 +12,7 @@ import time
 
 import argparse
 
-def compare_mad_attr(model1, model2, attr_fn, loader):
+def compare_mad_attr(model1, model2, layer1, layer2, attr_fn, loader):
     device = "cuda:0" if torch.cuda.is_available() else "cpu"
     model1.to(device).eval()
     model2.to(device).eval()
@@ -20,8 +20,8 @@ def compare_mad_attr(model1, model2, attr_fn, loader):
     total_mad = 0
     num_samples = 0
 
-    cam1 = attr_fn(model1)
-    cam2 = attr_fn(model2)
+    cam1 = attr_fn(model1, target_layer=layer1)
+    cam2 = attr_fn(model2, target_layer=layer2)
 
     for images, _ in loader:
         images = images.to(device)
@@ -74,7 +74,7 @@ if __name__ == "__main__":
     
     print("Loading Dataset and Models...")
     loader = utils.get_loader(args.test_dir, batch_size=250)
-    model_pairs = models.Models(args.models_dir).get_attribution_test_all_pairs()
+    model_pairs = models.Models(args.models_dir).get_attribution_test_dict_all()
     print("#"*60)
     
     print("Performing GradCam Comparisons...")
@@ -85,11 +85,45 @@ if __name__ == "__main__":
         start_time = time.time()
         m = compare_mad_attr(*v, GradCAM, loader)
         duration = time.time() - start_time
-        print(f"Results: M={m:.6f} in {duration:.0f} sec")
+        print(f"Results: M={m} in {duration:.0f} sec")
         results.append({"Model": k, "MAD": m})
     print("#"*60)
     
     file_name = "attribution_GradCam_mad_experiment.csv"
     print(f"Finished GradCam Comparisons, Saving to {file_name}...")
+    df = pd.DataFrame(results)
+    df.to_csv(file_name, index=False)
+
+    print("Performing SmoothGradCAM++ Comparisons...")
+    results = []
+    total = len(model_pairs)
+    for i, (k, v) in enumerate(model_pairs.items(), 1):
+        print(f"Comparing {i}/{total}: {k}")
+        start_time = time.time()
+        m = compare_mad_attr(*v, SmoothGradCAMpp, loader)
+        duration = time.time() - start_time
+        print(f"Results: M={m} in {duration:.0f} sec")
+        results.append({"Model": k, "MAD": m})
+    print("#"*60)
+    
+    file_name = "attribution_SmoothGradCAMpp_mad_experiment.csv"
+    print(f"Finished SmoothGradCAM++ Comparisons, Saving to {file_name}...")
+    df = pd.DataFrame(results)
+    df.to_csv(file_name, index=False)
+
+    print("Performing ScoreCAM Comparisons...")
+    results = []
+    total = len(model_pairs)
+    for i, (k, v) in enumerate(model_pairs.items(), 1):
+        print(f"Comparing {i}/{total}: {k}")
+        start_time = time.time()
+        m = compare_mad_attr(*v, ScoreCAM, loader)
+        duration = time.time() - start_time
+        print(f"Results: M={m} in {duration:.0f} sec")
+        results.append({"Model": k, "MAD": m})
+    print("#"*60)
+    
+    file_name = "attribution_ScoreCAM_mad_experiment.csv"
+    print(f"Finished ScoreCAM Comparisons, Saving to {file_name}...")
     df = pd.DataFrame(results)
     df.to_csv(file_name, index=False)
