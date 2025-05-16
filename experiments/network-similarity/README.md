@@ -16,4 +16,4 @@ To run:
 python am_mad_experiment.py --models_dir 'Path to the tuned models directory' --test_dir 'Path to the test set directory'
 ```
 
-Results available in am_mad_experiment.csv
+Results available in am_*_mad_experiment.csv
